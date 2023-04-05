@@ -5,9 +5,7 @@ public class Variable extends Parent
     // It has three variables:  the value of the variable in question, the name of it (such as "acceleration"), and its units (m/s^2 for example).
 
     private double value;
-
     private String name;
-
     private String unit;
 
     public Variable()
@@ -26,10 +24,6 @@ public class Variable extends Parent
         unit = uni;
     }
 
-    // Methods:
-
-    // ACCESSORS:
-
     public double get_value()
     {
         return value;
@@ -44,8 +38,6 @@ public class Variable extends Parent
     {
         return unit;
     }
-
-    // MUTATORS:
 
     public void set_value(double val)
     {

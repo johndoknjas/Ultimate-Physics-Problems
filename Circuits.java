@@ -1,209 +1,125 @@
 import java.util.Scanner;
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.Random;
 
-public class Circuits extends Parent
-{
-    // First step: Create variables of this class:
+public class Circuits extends Parent {
+    private ArrayList<String> names = new ArrayList<String>();
+    // Names of all math variables in the problem, such as "light bulb 1's resistance".
+    private ArrayList<String> display = new ArrayList<String>();
+    // Names of all math variables the computer will display to the user.
 
-    private ArrayList <String> names = new ArrayList <String>(); // This will hold the names of all the variables, such as "light bulb 1's resistance".
+    // Continue here - refactor to store voltage values, current values, resistance values,
+    // and total values in their own lists (instead of all in this values field).
+    // Could do the same with the names list.
+    // Better yet, store names and values together, by making use of the "Variable" class.
+    private ArrayList<Double> values = new ArrayList<Double>();
+    // Values of all the math variables, such as the value of bulb 1's resistance.
+    private boolean is_series;
+    private int num_bulbs;
+    Random random = new Random();
 
-    private ArrayList <String> display = new ArrayList <String>(); // This will hold the names of the variables that the computer will display to the user on screen.
+    public Circuits() {
+        is_series = random.nextBoolean();
+        num_bulbs = random.nextInt(1, 4);
 
-    private ArrayList <Double> values = new ArrayList <Double>(); // This will hold the values of all the variables, such as the value of bulb 1's resistance.
-
-    private boolean is_series; // Holds "true" if circuit is series, holds "false" if circuit is parallel.
-
-    private int num_bulbs; // Holds how many bulbs there will be.
-
-
-    // Constructor (both lists will be set, as well as the is_series variable and num_bulbs var):
-
-    public Circuits()
-    {
-        // is_series will be randomly set to "true" or "false":
-
-        if (random_int(2) == 1) // Method called in parent class, to generate 0 or 1 (the 2 is the range of nums).
-        {
-            is_series = true;
-        }
-
-        else
-        {
-            is_series = false;
-        }
-
-        // Now to give num_bulbs a value:
-
-        num_bulbs = random_int(1, 3); // At least 1 bulb, at most 3 bulbs.
-
-
-        // The first for loop will put in the names and values for Voltage of each bulb in the lists:
-
-        // The number of iterations will equal the number of bulbs:
-
-        for (int i = 1; i <= num_bulbs; i++)
-        {
-            names.add("voltage of bulb " + i);
-
-            // The value of the current bulb will be set to a random val from 1 to 50:
-
-            values.add((double)random_int(1, 50));
-
-            // Now, in case the circuit is parallel, the voltage of each bulb will equal each other:
-
-            // If this is the case, the current voltage must equal the voltage of the first bulb (at index 0 of values list):
-
-            if (is_series == false)
-            {
-                values.set(values.size() - 1, values.get(0));  // size - 1 is index of current element in list.
-
-                // Even if the current bulb is the first one, it will just be set to itself.
+        // First, put the names and values for the voltage of each bulb in the lists:
+        for (int i = 0; i < num_bulbs; i++) {
+            names.add("voltage of bulb " + (i+1));
+            if (is_series || i == 0) {
+                values.add((double)random_int(1, 50));
+            } else {
+                // If the circuit is parallel, the voltage of each bulb should equal all the others.
+                values.set(values.size()-1, values.get(0));
             }
         }
 
-        // The second for loop will put the names and values for Current of each bulb in the lists:
-
-        for (int i = 1; i <= num_bulbs; i++)
-        {
-            names.add("current of bulb " + i);
-
-            // The value of the current bulb will be set to a random val from 1 to 50:
-
-            values.add((double)random_int(1, 50));
-
-            // Now, in case the circuit is series, the current of each bulb will equal each other:
-
-            // If this is the case, the current of the current bulb must equal the current of the first bulb.
-
-            if (is_series == true)
-            {
-                values.set(values.size() - 1, values.get(0 + num_bulbs));
-
-                // size - 1 is index of current element in list.
+        // The second for loop will put the names and values for the current of each bulb in the lists:
+        for (int i = 0; i < num_bulbs; i++) {
+            names.add("current of bulb " + (i+1));
+            if (!is_series || i == 0) {
+                values.add((double)random_int(1, 50));
+            } else {
+                // In series circuits, all the bulbs have the same current.
+                values.set(values.size()-1, values.get(0 + num_bulbs));
                 // 0 + num_bulbs is the index for the first current (amps) value in the list.
             }
         }
 
         // The third for loop will put the names and values for Resistance of each bulb in the lists:
-
-        for (int i = 1; i <= num_bulbs; i++)
-        {
-            names.add("resistance of bulb " + i);
+        for (int i = 0; i < num_bulbs; i++) {
+            names.add("resistance of bulb " + (i+1));
 
             // The value for the current bulb's resistance is calculated from its voltage and current:
-
             // Ohms Law:  R = V / I
-
             // To do this, I need to figure out which elements in the ArrayList are the bulb's voltage and current.
 
-
             // Voltage would be at the index of current element - (2 * num_bulbs).
-
             // Current would be at the index of current element - num_bulbs.
 
-            int bulb_index = values.size(); // Not values.size() - 1, since I haven't created the new element yet.  The element isn't part of the array yet, making
-            // the Array 1 smaller than it would be.
+            int bulb_index = values.size();
+            // Not values.size() - 1, since I haven't created the new element yet.
+            // The element isn't part of the array yet, making the list 1 smaller than it would be.
 
             Double bulb_voltage = values.get(bulb_index - (2 * num_bulbs));
-
             Double bulb_current = values.get(bulb_index - num_bulbs);
-
-            // Now I have the current bulb's voltage and current.  I can add the resistance value to the values list:
-
             values.add(bulb_voltage / bulb_current);
         }
 
-
-
-        // Next step is to put total voltage, total current, and total resistance in the lists:
-
-        // temp vars that will be stored in values list:
+        // Next step is to calculate total voltage, total current, and total resistance, and put them in the lists:
 
         double total_voltage = 0;
-
         double total_current = 0;
 
-        double total_resistance = 0;
-
-
-        if (is_series == true)
-        {
+        if (is_series) {
             // total_voltage equals the sum of all the voltage values in the values list (Vo = V1 + V2 + V3).
 
             // I must find the indexes of each of the voltage values in the values list.  To do this, I'll find the
             // indexes of all the Strings in the names list that start with "v".  Then, I'll add the element of that
             // index in the values list to total_voltage.
-
-            for (int i = 0; i < names.size(); i++)
-            {
-                if (names.get(i).substring(0, 1).equals("v")) // If first character of current String is "v":
-                {
+            for (int i = 0; i < names.size(); i++) {
+                if (names.get(i).substring(0, 1).equals("v")) {
                     total_voltage += values.get(i);
                 }
             }
 
             // total_current equals any one of the current values in values list (Io = I1 = I2 = I3).
-
             // Algorithm for this is the same as the for loop above, except it breaks after one if statement runs.
-
-            for (int i = 0; i < names.size(); i++)
-            {
-                if (names.get(i).substring(0, 1).equals("c")) // If first character of current String is "c":
-                {
+            for (int i = 0; i < names.size(); i++) {
+                if (names.get(i).substring(0, 1).equals("c")) {
                     total_current = values.get(i);
-
                     break;
                 }
             }
-
-        }
-
-        else // meaning is_series = false, and the circuit is parallel:
-        {
-            // Total voltage = any voltage value in values list (Vo = V1 = V2 = V3):
-
-            for (int i = 0; i < names.size(); i++)
-            {
-                if (names.get(i).substring(0, 1).equals("v")) // If first character of current String is "v":
-                {
+        } else {
+            // Total voltage = any voltage value in the values list (Vo = V1 = V2 = V3):
+            for (int i = 0; i < names.size(); i++) {
+                if (names.get(i).substring(0, 1).equals("v")) {
                     total_voltage = values.get(i);
-
                     break;
                 }
             }
 
-            // Total current = sum of each current value in values list (Io = I1 + I2 + I3):
-
-            for (int i = 0; i < names.size(); i++)
-            {
-                if (names.get(i).substring(0, 1).equals("c")) // If first character of current String is "c":
-                {
+            // Total current = sum of each current value in the values list (Io = I1 + I2 + I3):
+            for (int i = 0; i < names.size(); i++) {
+                if (names.get(i).substring(0, 1).equals("c")) {
                     total_current += values.get(i);
                 }
             }
         }
 
         // total_resistance equals total_voltage / total_current.  It doesn't matter if the circuit is series or
-        // parallel, which is why the following statement takes place after both of the above if/else statements.
-
-        total_resistance = total_voltage / total_current;
-
-        // Now to add to the lists:
-
+        // parallel.
+        double total_resistance = total_voltage / total_current;
         values.add(total_voltage);
         names.add("voltage of the entire circuit");
-
         values.add(total_current);
         names.add("current of the entire circuit");
-
         values.add(total_resistance);
         names.add("resistance of the entire circuit");
 
-
-        // Now to call the main method of this class ("runner") to display some of the variables to the user and get
-        // the user to try to find the unknown variables:
-
+        // Call the main method of this class ("runner") to display some of the variables to the user, and get
+        // them to try to solve for the unknown variables:
         runner();
     }
 
